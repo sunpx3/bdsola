@@ -10,6 +10,7 @@ from MySQLdb import connect
 from scrapy.utils.project import get_project_settings  
 from twisted.enterprise import adbapi
 
+
 class BdsolaPipeline(object):
     
 #     def __init__(self):
