@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+encoding//bdsola/items.py=utf-8
+encoding//bdsola/pipelines.py=utf8
+encoding//bdsola/settings.py=utf-8
+encoding//bdsola/spiders/RotateUserAgentMiddleware.py=UTF-8
+encoding//bdsola/spiders/bdsolaSpider.py=UTF8
