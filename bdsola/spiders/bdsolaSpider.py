@@ -7,6 +7,8 @@ from scrapy.selector import Selector
 from scrapy.http import Request
 import time
 import random
+import logging
+
 class searchBookSpider(CrawlSpider):
 
     name = 'bdsola';
@@ -63,19 +65,10 @@ class searchBookSpider(CrawlSpider):
             self.state['items_count'] = searchBookSpider.i;
             url = "http://www.bdsola.com/d/" + str(searchBookSpider.i) + ".html";
         else:
-            print("\n\n*******************抓取结束******************\n\n");
+            logging.info("抓取结束");
             return;
-        
-        headers = {
-            "Accept":"text/html,application/xhtml",
-            "Accept-Encoding":"gzip, deflate, sdch",
-            "Accept-Language":"zh-CN,zh;q=0.8",
-            "Cache-Control":"max-age=0",
-            "DNT":"1",
-            "Host":"m.bdsola.com",
-            "User-Agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36"
-        }
-        yield Request(url, callback=self.parse,headers=headers);
+
+        yield Request(url, callback=self.parse);
             
 
 

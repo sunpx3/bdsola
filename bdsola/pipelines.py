@@ -9,32 +9,39 @@ from bdsola import items
 from MySQLdb import connect
 from scrapy.utils.project import get_project_settings  
 from twisted.enterprise import adbapi
-
-
+import MySQLdb, MySQLdb.cursors 
+import logging
 class BdsolaPipeline(object):
     
-#     def __init__(self):
-#         settings = get_project_settings();
-#         dbdic = dict(host=settings['MYSQL_HOST'],
-#                     user=settings['MYSQL_USER'],
-#                     passwd=settings['MYSQL_PASSWD'],
-#                     db=settings['MYSQL_DBNAME'],
-#                     port=settings['MYSQL_PORT'],
-#                     charset='utf8')
-#         self.dbpool = adbapi.ConnectionPool("MySQLdb",dbdic);
-#         
-    
-    def process_item(self, item, spider):
+    def __init__(self):
         settings = get_project_settings();
-        conn = connect(
-            host=settings['MYSQL_HOST'],
-            user=settings['MYSQL_USER'],
-            passwd=settings['MYSQL_PASSWD'],
-            db=settings['MYSQL_DBNAME'],
-            port=settings['MYSQL_PORT'],
-            charset='utf8');
+        self.dbpool = adbapi.ConnectionPool(
+                dbapiName ='MySQLdb',
+                host = settings['MYSQL_HOST'],
+                db   = settings['MYSQL_DBNAME'],
+                user = settings['MYSQL_USER'],
+                passwd = settings['MYSQL_PASSWD'],
+                cursorclass = MySQLdb.cursors.DictCursor,
+                charset = 'utf8',
+                use_unicode = False
+        )
         
-        cur = conn.cursor();
+    # JDBC连接
+    # settings = get_project_settings();
+    # conn = connect(
+    # host=settings['MYSQL_HOST'],
+    # user=settings['MYSQL_USER'],
+    # passwd=settings['MYSQL_PASSWD'],
+    # db=settings['MYSQL_DBNAME'],
+    # port=settings['MYSQL_PORT'],
+    # charset='utf8')
+
+    def process_item(self, item, spider):
+        self.dbpool.runInteraction(self.insert_item, item)
+        return items
+    
+    def insert_item(self, tx, item):
+
         filetype = item['filetype'];
         table = '';
         
@@ -83,18 +90,14 @@ class BdsolaPipeline(object):
         # 无法实别类型默认为ntj_files表
         if table == '':
             table = '`ntj_files`';
-    
-        # 开启事物
-        try:
-            sql = "insert into {0}(title,filesize,filetype,stime,downurl,curview,shareusr,picname,shareip,sh,usrid) values('{1}','{2}','{3}',{4},'{5}',{6},'{7}','{8}','{9}',{10},'{11}')".format(table, item['title'],
-                    item['filesize'], item['filetype'], item['stime'], item['downurl'],
-                    item['curview'], item['shareusr'], item['picname'], item['shareip'], item['sh'], item['userid']);
-            cur.execute(sql);
-            conn.commit();
-        except Exception:
-            cur.close();
-            conn.rollback();
-        finally:
-            conn.close();
             
-        return item
+        #dbpool会自动处理异常连接，commit之类的问题，故，取消此处异常处理
+        sql = "insert into {0}(title,filesize,filetype,stime,downurl,curview,shareusr,picname,shareip,sh,usrid) values('{1}','{2}','{3}',{4},'{5}',{6},'{7}','{8}','{9}',{10},'{11}')".format(table, item['title'],
+                item['filesize'], item['filetype'], item['stime'], item['downurl'],
+                item['curview'], item['shareusr'], item['picname'], item['shareip'], item['sh'], item['userid']);
+        try:        
+            tx.execute(sql);
+        except Exception,e:
+            logging.error(e);
+
+
