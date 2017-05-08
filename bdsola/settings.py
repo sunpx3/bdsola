@@ -95,7 +95,7 @@ AUTOTHROTTLE_ENABLED = True
 MYSQL_HOST   = 'localhost'
 MYSQL_DBNAME = 'bdsola'
 MYSQL_USER   = 'root'
-MYSQL_PASSWD = 'wawzj45'
+MYSQL_PASSWD = 'abc'
 MYSQL_PORT   =  3306
 # end of MySQL database configure setting
 
